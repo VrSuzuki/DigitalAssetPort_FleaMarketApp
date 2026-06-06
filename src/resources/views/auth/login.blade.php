@@ -1,0 +1,32 @@
+@extends('layouts.base')
+
+@section('title', 'ログイン | DigitalAssetPort')
+
+@section('body')
+  @include('layouts.header')
+
+  <main class="auth-main">
+    <section class="auth-card">
+      <h1>ログイン画面</h1>
+      @include('partials.flash')
+      @include('partials.errors')
+      <form method="POST" action="{{ route('login') }}">
+        @csrf
+        <div class="form-grid form-grid--single">
+          <div class="field">
+            <label for="email">メールアドレス</label>
+            <input class="input" id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>
+          </div>
+          <div class="field">
+            <label for="password">パスワード</label>
+            <input class="input" id="password" type="password" name="password" required>
+          </div>
+        </div>
+        <div class="form-actions" style="margin-top: 18px;">
+          <button class="button button--primary" type="submit">ログインする</button>
+          <a class="button button--ghost" href="{{ route('register') }}">アカウント登録はこちら</a>
+        </div>
+      </form>
+    </section>
+  </main>
+@endsection
