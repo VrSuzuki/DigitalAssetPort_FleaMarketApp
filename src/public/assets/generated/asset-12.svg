@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Audio starter">
+  <rect width="640" height="400" rx="28" fill="#07111f"/>
+  <path d="M110 242h90l100 74V84L200 158h-90z" fill="#20c7d2"/>
+  <path d="M376 132c42 34 42 102 0 136M430 86c74 72 74 214 0 286" fill="none" stroke="#ffcf5a" stroke-width="22" stroke-linecap="round"/>
+  <rect x="76" y="302" width="488" height="42" rx="21" fill="#ffffff"/>
+  <circle cx="286" cy="323" r="28" fill="#ff637d"/>
+</svg>

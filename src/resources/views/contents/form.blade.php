@@ -15,7 +15,7 @@
       </div>
       @include('partials.errors')
 
-      <form method="POST" action="{{ $content->exists ? route('contents.update', $content) : route('contents.store') }}" enctype="multipart/form-data">
+      <form method="POST" action="{{ $content->exists ? route('contents.update', $content) : route('contents.store') }}" enctype="multipart/form-data" novalidate>
         @csrf
         @if($content->exists)
           @method('PUT')
@@ -23,15 +23,15 @@
         <div class="form-grid">
           <div class="field">
             <label for="title">コンテンツ名</label>
-            <input class="input" id="title" name="title" value="{{ old('title', $content->title) }}" required>
+            <input class="input" id="title" name="title" value="{{ old('title', $content->title) }}">
           </div>
           <div class="field">
             <label for="price">価格</label>
-            <input class="input" id="price" type="number" name="price" min="0" max="100000" value="{{ old('price', $content->price) }}" required>
+            <input class="input" id="price" type="number" name="price" min="0" max="100000" step="100" value="{{ old('price', $content->price) }}">
           </div>
           <div class="field">
             <label for="genre_id">ジャンル</label>
-            <select class="select" id="genre_id" name="genre_id" required>
+            <select class="select" id="genre_id" name="genre_id">
               @foreach($genres as $genre)
                 <option value="{{ $genre->id }}" {{ (int) old('genre_id', $content->genre_id) === $genre->id ? 'selected' : '' }}>{{ $genre->name }}</option>
               @endforeach
@@ -39,7 +39,7 @@
           </div>
           <div class="field">
             <label for="sub_genre_id">サブジャンル</label>
-            <select class="select" id="sub_genre_id" name="sub_genre_id" required>
+            <select class="select" id="sub_genre_id" name="sub_genre_id">
               @foreach($subGenres as $subGenre)
                 <option value="{{ $subGenre->id }}" {{ (int) old('sub_genre_id', $content->sub_genre_id) === $subGenre->id ? 'selected' : '' }}>{{ $subGenre->genre->name ?? '' }} / {{ $subGenre->name }}</option>
               @endforeach
@@ -58,12 +58,33 @@
             <input class="input" id="license_type" name="license_type" value="{{ old('license_type', $content->license_type) }}">
           </div>
           <div class="field field--full">
-            <label for="thumbnail">コンテンツ画像</label>
-            <input class="input" id="thumbnail" type="file" name="thumbnail" accept="image/*">
+            <label for="content_images_input">コンテンツ画像</label>
+            <div class="image-repeater" data-image-repeater data-max-images="20">
+              <div class="image-repeater__list" data-image-list>
+                @if($content->exists && $content->images->count())
+                  @foreach($content->images as $image)
+                    <div class="image-record">
+                      <img src="{{ $image->url }}" alt="登録済みコンテンツ画像{{ $loop->iteration }}">
+                      <span>登録済み画像 {{ $loop->iteration }}</span>
+                    </div>
+                  @endforeach
+                @elseif($content->thumbnail_path)
+                  <div class="image-record">
+                    <img src="{{ $content->thumbnail_url }}" alt="登録済みコンテンツ画像">
+                    <span>登録済み画像</span>
+                  </div>
+                @endif
+              </div>
+              <label class="button button--primary image-upload__button" for="content_images_input">
+                <span class="material-symbols-outlined" aria-hidden="true">add_photo_alternate</span>
+                画像を追加
+              </label>
+              <input class="visually-hidden" id="content_images_input" type="file" name="images[]" accept="image/*" multiple data-file-input>
+            </div>
           </div>
           <div class="field field--full">
             <label for="description">コンテンツ紹介文</label>
-            <textarea class="textarea" id="description" name="description" required>{{ old('description', $content->description) }}</textarea>
+            <textarea class="textarea" id="description" name="description" maxlength="5000">{{ old('description', $content->description) }}</textarea>
           </div>
           <div class="field">
             <label for="tags">タグ</label>

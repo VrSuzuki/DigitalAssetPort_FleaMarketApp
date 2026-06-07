@@ -10,12 +10,8 @@
     <section class="hero hero--image" aria-labelledby="about-title">
       <div class="hero__content">
         <p class="eyebrow">DigitalAssetPort</p>
-        <h1 id="about-title">デジタルデータが、必要な人の港へ届く。</h1>
-        <p>作業を速くするテンプレート、学びを深める教材、業務を回すマニュアル、すぐ試せるシステム。クリエイター、学生、店舗運営者、開発者が、ファイルとして渡せる知見を持ち寄るマーケットです。</p>
-        <div class="hero__actions">
-          <a class="button button--primary" href="{{ route('register') }}">これから見ていこう</a>
-          <a class="button button--ghost" href="{{ route('home') }}">コンテンツを見る</a>
-        </div>
+        <h1 id="about-title">どんなデータでも置ける<br>総合マーケットプレイス</h1>
+        <p>作業を速くするテンプレート、学びを深める教材、AIをより使いやすくするプロンプト、無料フォントをまとめたリスト、すぐ試せるシステム。PCを利用する様々な人々が、ファイルとして渡せるものを持ち寄るマーケットです。</p>
       </div>
     </section>
 
@@ -51,7 +47,7 @@
                 @switch($genre->slug)
                   @case('business-office') table_chart @break
                   @case('manufacturing') precision_manufacturing @break
-                  @case('store') storefront @break
+                  @case('daily-life') home_health @break
                   @case('code-system') code_blocks @break
                   @case('education') school @break
                   @default palette
@@ -94,9 +90,13 @@
 
         <div class="hero" style="min-height: 240px; margin-top: 36px;">
           <div class="hero__content">
-            <h2 class="section-title">あなたのデータを、次の誰かの制作環境へ。</h2>
+            <h2 class="section-title">あなたのデータを、次の誰かのためへ。</h2>
             <div class="hero__actions">
-              <a class="button button--primary" href="{{ route('register') }}">会員登録へ</a>
+              @auth
+                <a class="button button--primary" href="{{ route('contents.create') }}">コンテンツを投稿する</a>
+              @else
+                <a class="button button--primary" href="{{ route('register') }}">アカウント登録へ</a>
+              @endauth
             </div>
           </div>
         </div>

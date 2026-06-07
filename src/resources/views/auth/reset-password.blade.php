@@ -9,21 +9,21 @@
     <section class="auth-card">
       <h1>新しいパスワード</h1>
       @include('partials.errors')
-      <form method="POST" action="{{ route('password.update') }}">
+      <form method="POST" action="{{ route('password.update') }}" novalidate>
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
         <div class="form-grid form-grid--single">
           <div class="field">
             <label for="email">メールアドレス</label>
-            <input class="input" id="email" type="email" name="email" value="{{ old('email', $request->email) }}" required>
+            <input class="input" id="email" type="email" name="email" value="{{ old('email', $request->email) }}">
           </div>
           <div class="field">
             <label for="password">パスワード</label>
-            <input class="input" id="password" type="password" name="password" required>
+            <input class="input" id="password" type="password" name="password">
           </div>
           <div class="field">
             <label for="password_confirmation">パスワード確認</label>
-            <input class="input" id="password_confirmation" type="password" name="password_confirmation" required>
+            <input class="input" id="password_confirmation" type="password" name="password_confirmation">
           </div>
         </div>
         <div class="form-actions" style="margin-top: 18px;">

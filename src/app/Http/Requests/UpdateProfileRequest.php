@@ -24,7 +24,7 @@ class UpdateProfileRequest extends FormRequest
             ],
             'nickname' => ['required', 'string', 'max:40'],
             'avatar' => ['nullable', 'image', 'max:4096'],
-            'bio' => ['nullable', 'string', 'max:800'],
+            'bio' => ['nullable', 'string', 'max:1500'],
         ];
     }
 

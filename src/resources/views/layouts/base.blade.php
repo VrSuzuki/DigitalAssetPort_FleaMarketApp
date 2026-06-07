@@ -26,6 +26,7 @@
 
   <link rel="stylesheet" href="{{ asset('css/reset.css') }}">
   <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+  <script defer src="{{ asset('js/app.js') }}"></script>
   @stack('styles')
 </head>
 <body class="@yield('body_class')">

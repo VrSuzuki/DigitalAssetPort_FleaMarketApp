@@ -12,9 +12,29 @@
       <img class="avatar-sm" src="{{ $content->author->avatar_url }}" alt="">
       <a href="{{ route('profiles.show', $content->author) }}">{{ $content->author->display_name }}</a>
     </div>
+    @php
+      $favoriteCount = $content->favorites_count ?? $content->favorites()->count();
+      $isFavorited = auth()->check()
+          ? $content->favorites()->where('user_id', auth()->id())->exists()
+          : false;
+    @endphp
     <div class="content-card__footer">
       <span class="price">{{ $content->formatted_price }}</span>
       <span class="rating">{{ $content->rating_label }} / {{ number_format($content->ratings_count) }}件</span>
+      @auth
+        <form method="POST" action="{{ route('favorites.toggle', $content) }}">
+          @csrf
+          <button class="favorite-pill {{ $isFavorited ? 'is-active' : '' }}" type="submit" aria-label="お気に入り">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+            {{ number_format($favoriteCount) }}
+          </button>
+        </form>
+      @else
+        <a class="favorite-pill" href="{{ route('login') }}" aria-label="お気に入り">
+          <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+          {{ number_format($favoriteCount) }}
+        </a>
+      @endauth
     </div>
     @auth
       @if(!empty($editable) && $content->user_id === auth()->id())

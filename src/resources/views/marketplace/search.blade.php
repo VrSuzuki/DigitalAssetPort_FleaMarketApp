@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <form class="panel" action="{{ route('search.advanced') }}" method="GET">
+    <form class="panel" action="{{ route('home') }}" method="GET">
       <div class="form-grid">
         <div class="field">
           <label for="keyword">キーワード</label>
@@ -54,10 +54,16 @@
             @endforeach
           </select>
         </div>
-        <div class="field">
-          <label for="max_price">価格 0〜￥10000+</label>
-          <input class="input" id="max_price" type="range" name="max_price" min="0" max="10000" step="500" value="{{ request('max_price', 10000) }}" oninput="document.getElementById('priceLabel').textContent = '￥' + Number(this.value).toLocaleString()">
-          <strong id="priceLabel">￥{{ number_format(request('max_price', 10000)) }}</strong>
+        <div class="field field--full">
+          <label>価格</label>
+          <div class="dual-range" data-dual-range>
+            <div class="dual-range__labels">
+              <strong>￥<span data-min-label>{{ number_format(request('min_price', 0)) }}</span></strong>
+              <strong>￥<span data-max-label>{{ number_format(request('max_price', 10000)) }}</span></strong>
+            </div>
+            <input type="range" name="min_price" min="0" max="10000" step="500" value="{{ request('min_price', 0) }}" aria-label="下限価格">
+            <input type="range" name="max_price" min="0" max="10000" step="500" value="{{ request('max_price', 10000) }}" aria-label="上限価格">
+          </div>
         </div>
         <div class="field">
           <label for="sort">表示順序</label>
@@ -81,22 +87,6 @@
         <button class="button button--primary" type="submit">検索</button>
       </div>
     </form>
-
-    <section class="section" aria-labelledby="search-results">
-      <div class="section-heading">
-        <h2 class="section-title" id="search-results">検索結果</h2>
-      </div>
-      @if($contents->count())
-        <div class="content-grid">
-          @foreach($contents as $content)
-            @include('partials.content-card', ['content' => $content])
-          @endforeach
-        </div>
-        <div class="pagination">{{ $contents->links() }}</div>
-      @else
-        <div class="empty-state">条件に合うコンテンツがありません。</div>
-      @endif
-    </section>
   </main>
 
   @include('layouts.footer')

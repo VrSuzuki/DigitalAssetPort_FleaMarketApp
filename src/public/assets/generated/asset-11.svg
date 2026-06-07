@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Travel board">
+  <rect width="640" height="400" rx="28" fill="#eff6fb"/>
+  <path d="M120 286h400l-48 60H168z" fill="#101624"/>
+  <rect x="158" y="88" width="324" height="224" rx="22" fill="#ffffff" stroke="#dfe7ee" stroke-width="4"/>
+  <path d="M196 150h248M196 206h188M196 262h226" stroke="#253044" stroke-width="16" stroke-linecap="round"/>
+  <path d="M470 78l72 64-58 18-18 58-64-72z" fill="#20c7d2"/>
+  <circle cx="138" cy="306" r="36" fill="#ff637d"/>
+</svg>

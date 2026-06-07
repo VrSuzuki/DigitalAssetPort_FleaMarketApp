@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Video kit">
+  <rect width="640" height="400" rx="28" fill="#0d1424"/>
+  <rect x="76" y="78" width="488" height="274" rx="24" fill="#111f33" stroke="#20c7d2" stroke-width="5"/>
+  <path d="M280 154l116 66-116 66z" fill="#ffcf5a"/>
+  <path d="M116 114h94M116 300h398" stroke="#ff637d" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="520" cy="116" r="32" fill="#4bdca8"/>
+</svg>

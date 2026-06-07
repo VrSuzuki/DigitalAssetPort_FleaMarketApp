@@ -14,12 +14,16 @@ class StoreCommentRequest extends FormRequest
     public function rules()
     {
         return [
+            'is_recommended' => ['required', 'boolean'],
             'message' => ['required', 'string', 'max:800'],
         ];
     }
 
     public function attributes()
     {
-        return ['message' => 'コメント'];
+        return [
+            'is_recommended' => 'おすすめ評価',
+            'message' => 'コメント',
+        ];
     }
 }

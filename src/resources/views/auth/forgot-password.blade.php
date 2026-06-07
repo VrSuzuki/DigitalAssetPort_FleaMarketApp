@@ -10,11 +10,11 @@
       <h1>パスワード再設定</h1>
       @include('partials.flash')
       @include('partials.errors')
-      <form method="POST" action="{{ route('password.email') }}">
+      <form method="POST" action="{{ route('password.email') }}" novalidate>
         @csrf
         <div class="field">
           <label for="email">メールアドレス</label>
-          <input class="input" id="email" type="email" name="email" value="{{ old('email') }}" required>
+          <input class="input" id="email" type="email" name="email" value="{{ old('email') }}">
         </div>
         <div class="form-actions" style="margin-top: 18px;">
           <button class="button button--primary" type="submit">再設定メールを送る</button>

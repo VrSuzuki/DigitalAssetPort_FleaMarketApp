@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AccountSettingsRequest;
+use App\Models\CartItem;
+use App\Models\Content;
+use App\Models\LibraryItem;
 use App\Models\Order;
+use App\Models\OrderItem;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
@@ -38,6 +43,7 @@ class AccountController extends Controller
     public function sales()
     {
         $user = auth()->user();
+        $tab = request('tab', 'monthly');
 
         $total = DB::table('order_items')
             ->join('contents', 'contents.id', '=', 'order_items.content_id')
@@ -71,7 +77,15 @@ class AccountController extends Controller
             ->orderByDesc('amount')
             ->get();
 
-        return view('account.sales', compact('total', 'monthly', 'daily', 'products'));
+        $orders = Order::whereHas('items.content', function ($query) use ($user) {
+                $query->where('contents.user_id', $user->id);
+            })
+            ->with(['user', 'items.content'])
+            ->latest('purchased_at')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('account.sales', compact('total', 'monthly', 'daily', 'products', 'orders', 'tab'));
     }
 
     public function purchases()
@@ -137,5 +151,26 @@ class AccountController extends Controller
         auth()->user()->appNotifications()->whereNull('read_at')->update(['read_at' => now()]);
 
         return view('account.notifications', compact('notifications'));
+    }
+
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+
+        DB::transaction(function () use ($user) {
+            $contentIds = Content::where('user_id', $user->id)->pluck('id');
+
+            CartItem::whereIn('content_id', $contentIds)->delete();
+            LibraryItem::whereIn('content_id', $contentIds)->delete();
+            OrderItem::whereIn('content_id', $contentIds)->delete();
+
+            $user->delete();
+        });
+
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')->with('status', 'アカウントを削除しました。');
     }
 }

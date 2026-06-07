@@ -9,6 +9,7 @@ use App\Models\SubGenre;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ContentManageController extends Controller
 {
@@ -24,6 +25,8 @@ class ContentManageController extends Controller
 
     public function store(StoreContentRequest $request)
     {
+        $this->ensureImageLimit($request, new Content());
+
         $data = $this->payload($request);
         $data['user_id'] = $request->user()->id;
         $data['slug'] = $this->uniqueSlug($request->input('title'));
@@ -31,6 +34,7 @@ class ContentManageController extends Controller
         $data['status'] = 'published';
 
         $content = Content::create($data);
+        $this->storeImages($request, $content);
         $this->syncTags($content, $request->input('tags'));
 
         return redirect()->route('contents.show', $content)->with('status', 'コンテンツを投稿しました。');
@@ -40,7 +44,7 @@ class ContentManageController extends Controller
     {
         abort_unless($content->user_id === auth()->id(), 403);
 
-        $content->load('tags');
+        $content->load(['tags', 'images']);
 
         return view('contents.form', [
             'content' => $content,
@@ -53,6 +57,7 @@ class ContentManageController extends Controller
     public function update(StoreContentRequest $request, Content $content)
     {
         abort_unless($content->user_id === $request->user()->id, 403);
+        $this->ensureImageLimit($request, $content);
 
         $data = $this->payload($request, $content);
 
@@ -61,6 +66,7 @@ class ContentManageController extends Controller
         }
 
         $content->update($data);
+        $this->storeImages($request, $content);
         $this->syncTags($content, $request->input('tags'));
 
         return redirect()->route('contents.show', $content)->with('status', 'コンテンツ情報を更新しました。');
@@ -113,6 +119,37 @@ class ContentManageController extends Controller
         }
 
         return $data;
+    }
+
+    private function storeImages(StoreContentRequest $request, Content $content)
+    {
+        $currentCount = $content->images()->count();
+        $files = collect($request->file('images', []))->filter();
+
+        foreach ($files as $index => $file) {
+            $path = $file->store('content-images', 'public');
+
+            $image = $content->images()->create([
+                'path' => $path,
+                'sort_order' => $currentCount + $index + 1,
+            ]);
+
+            if (!$content->thumbnail_path || $index === 0 && $currentCount === 0) {
+                $content->update(['thumbnail_path' => $image->path]);
+            }
+        }
+    }
+
+    private function ensureImageLimit(StoreContentRequest $request, Content $content)
+    {
+        $newImageCount = collect($request->file('images', []))->filter()->count();
+        $currentCount = $content->exists ? $content->images()->count() : 0;
+
+        if ($currentCount + $newImageCount > 20) {
+            throw ValidationException::withMessages([
+                'images' => 'コンテンツ画像は最大20枚まで追加できます。',
+            ]);
+        }
     }
 
     private function uniqueSlug($title, ?Content $ignore = null)

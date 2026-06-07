@@ -23,6 +23,30 @@ class ProfileController extends Controller
         return view('profiles.show', compact('user', 'contents', 'isOwner', 'isFollowing'));
     }
 
+    public function following(User $user)
+    {
+        $this->authorizeFollowVisibility($user, 'show_following_count');
+
+        return view('account.users', [
+            'users' => $user->following()->paginate(20),
+            'title' => $user->display_name.'さんのフォロー一覧',
+            'switchLabel' => 'フォロワー一覧へ',
+            'switchRoute' => route('profiles.followers', $user),
+        ]);
+    }
+
+    public function followers(User $user)
+    {
+        $this->authorizeFollowVisibility($user, 'show_follower_count');
+
+        return view('account.users', [
+            'users' => $user->followers()->paginate(20),
+            'title' => $user->display_name.'さんのフォロワー一覧',
+            'switchLabel' => 'フォロー一覧へ',
+            'switchRoute' => route('profiles.following', $user),
+        ]);
+    }
+
     public function edit()
     {
         return view('profiles.edit', ['user' => auth()->user()]);
@@ -30,8 +54,7 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request)
     {
-        $data = $request->only(['handle', 'nickname', 'bio']);
-        $data['name'] = $request->input('handle');
+        $data = $request->only(['nickname', 'bio']);
 
         if ($request->hasFile('avatar')) {
             $data['avatar_path'] = $request->file('avatar')->store('avatars', 'public');
@@ -40,5 +63,12 @@ class ProfileController extends Controller
         $request->user()->update($data);
 
         return redirect()->route('profiles.show', $request->user())->with('status', 'プロフィールを更新しました。');
+    }
+
+    private function authorizeFollowVisibility(User $user, string $flag)
+    {
+        $isOwner = auth()->check() && auth()->id() === $user->id;
+
+        abort_unless($isOwner || $user->{$flag}, 403);
     }
 }

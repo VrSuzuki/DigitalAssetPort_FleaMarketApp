@@ -1,6 +1,6 @@
 # DigitalAssetPort
 
-DigitalAssetPort は、Excel / Word / Notion テンプレート、店舗運営マニュアル、学習教材、コード演習セット、動画素材、3Dモデルなどのデジタルデータを販売・配布できる Laravel 製ポートフォリオアプリです。
+DigitalAssetPort は、Excel / Word / Notion テンプレート、生活ノウハウ、学習教材、コード演習セット、動画素材、3Dモデルなどのデジタルデータを販売・配布できる Laravel 製ポートフォリオアプリです。
 
 ## 使用技術
 
@@ -33,11 +33,20 @@ MailHog は `http://localhost:8025` で確認できます。
 - `office@example.com`
 - `code@example.com`
 - `study@example.com`
+- `life@example.com`
+- `factory@example.com`
 - `creative@example.com`
+- `prompt@example.com`
+- `font@example.com`
+- `shop@example.com`
+- `video@example.com`
+- `research@example.com`
+
+Seeder は既存の会員・コンテンツ系データを作り直し、12ユーザー、36コンテンツ、購入履歴、通知、フォロー、お気に入りを生成します。
 
 ## 実装済み画面
 
-- ルートページ
+- トップページ
 - DigitalAssetPort紹介画面
 - 詳細検索画面
 - コンテンツ詳細画面
@@ -82,6 +91,7 @@ erDiagram
     SUB_GENRES ||--o{ CONTENTS : narrows
 
     CONTENTS ||--o{ COMMENTS : has
+    CONTENTS ||--o{ CONTENT_IMAGES : shows
     CONTENTS ||--o{ FAVORITES : has
     CONTENTS ||--o{ CART_ITEMS : added
     CONTENTS ||--o{ ORDER_ITEMS : sold
@@ -161,6 +171,14 @@ erDiagram
         bigint user_id FK
         bigint content_id FK
         text message
+        boolean is_recommended
+    }
+
+    CONTENT_IMAGES {
+        bigint id PK
+        bigint content_id FK
+        string path
+        tinyint sort_order
     }
 
     CARTS {

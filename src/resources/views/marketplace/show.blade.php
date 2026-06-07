@@ -11,9 +11,21 @@
 
     <div class="detail-layout">
       <article>
+        @php
+          $galleryImages = $content->images->count()
+              ? $content->images->map->url
+              : collect([$content->thumbnail_url]);
+        @endphp
         <div class="detail-image">
-          <img src="{{ $content->thumbnail_url }}" alt="{{ $content->title }}">
+          <img src="{{ $galleryImages->first() }}" alt="{{ $content->title }}">
         </div>
+        @if($galleryImages->count() > 1)
+          <div class="image-strip">
+            @foreach($galleryImages as $image)
+              <img src="{{ $image }}" alt="{{ $content->title }} 画像{{ $loop->iteration }}">
+            @endforeach
+          </div>
+        @endif
 
         <section class="panel" style="margin-top: 16px;">
           <div class="pill-row">
@@ -33,13 +45,30 @@
         <section class="panel" style="margin-top: 16px;" id="comments">
           <h2>コメント</h2>
           @auth
-            <form action="{{ route('comments.store', $content) }}" method="POST" style="margin-bottom: 14px;">
-              @csrf
-              <textarea class="textarea" name="message" placeholder="コメントを書く">{{ old('message') }}</textarea>
-              <div class="form-actions" style="margin-top: 10px;">
-                <button class="button button--primary" type="submit">投稿</button>
-              </div>
-            </form>
+            @if($hasPurchased && $content->user_id !== auth()->id())
+              <form action="{{ route('comments.store', $content) }}" method="POST" style="margin-bottom: 14px;">
+                @csrf
+                <fieldset class="review-choice">
+                  <legend>このコンテンツをおすすめしますか？</legend>
+                  <label>
+                    <input type="radio" name="is_recommended" value="1" {{ old('is_recommended', '1') === '1' ? 'checked' : '' }}>
+                    <span class="material-symbols-outlined" aria-hidden="true">thumb_up</span>
+                    はい
+                  </label>
+                  <label>
+                    <input type="radio" name="is_recommended" value="0" {{ old('is_recommended') === '0' ? 'checked' : '' }}>
+                    <span class="material-symbols-outlined" aria-hidden="true">thumb_down</span>
+                    いいえ
+                  </label>
+                </fieldset>
+                <textarea class="textarea" name="message" placeholder="コメントを書く">{{ old('message') }}</textarea>
+                <div class="form-actions" style="margin-top: 10px;">
+                  <button class="button button--primary" type="submit">評価とコメントを投稿</button>
+                </div>
+              </form>
+            @else
+              <p style="color: var(--muted); margin-bottom: 12px;">評価とコメントは購入済みユーザーのみ投稿できます。</p>
+            @endif
           @else
             <p style="color: var(--muted); margin-bottom: 12px;"><a class="nav-link" href="{{ route('login') }}">ログイン</a>するとコメントできます。</p>
           @endauth
@@ -49,6 +78,11 @@
               <img class="avatar-sm" src="{{ $comment->user->avatar_url }}" alt="">
               <div>
                 <strong><a href="{{ route('profiles.show', $comment->user) }}">{{ $comment->user->display_name }}</a></strong>
+                <div class="comment__meta">
+                  <span class="material-symbols-outlined" aria-hidden="true">{{ $comment->is_recommended ? 'thumb_up' : 'thumb_down' }}</span>
+                  <span>{{ $comment->is_recommended ? 'おすすめ' : 'おすすめしない' }}</span>
+                  <time datetime="{{ $comment->created_at->toIso8601String() }}">{{ $comment->created_at->format('Y/m/d H:i') }}</time>
+                </div>
                 <p>{{ $comment->message }}</p>
               </div>
             </div>
@@ -92,7 +126,6 @@
           <div class="spec-list">
             <div><span>評価率</span><strong>{{ $content->rating_label }}</strong></div>
             <div><span>評価数</span><strong>{{ number_format($content->ratings_count) }}</strong></div>
-            <div><span>お気に入り</span><strong>{{ number_format($content->favorites_count) }}</strong></div>
             <div><span>価格</span><strong>{{ $content->formatted_price }}</strong></div>
           </div>
 
@@ -100,20 +133,28 @@
             @auth
               <form method="POST" action="{{ route('favorites.toggle', $content) }}">
                 @csrf
-                <button class="icon-button" type="submit" aria-label="お気に入り">
+                <button class="favorite-pill favorite-pill--large {{ $isFavorite ? 'is-active' : '' }}" type="submit" aria-label="お気に入り">
                   <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+                  {{ number_format($content->favorites_count) }}
                 </button>
               </form>
               @if($content->user_id === auth()->id())
                 <a class="button button--ghost" href="{{ route('contents.edit', $content) }}">編集</a>
+                <button class="button button--ghost purchase-button" type="button" disabled>購入できません</button>
+              @elseif($hasPurchased && $purchaseOrder)
+                <a class="button button--primary purchase-button" href="{{ route('purchases.show', $purchaseOrder) }}">購入済み</a>
+              @elseif($hasPurchased)
+                <a class="button button--primary purchase-button" href="{{ route('library.index') }}">ライブラリ追加済み</a>
+              @elseif($inCart)
+                <a class="button button--ghost purchase-button" href="{{ route('cart.index') }}">カートに入っています</a>
               @else
                 <form method="POST" action="{{ route('cart.store', $content) }}">
                   @csrf
-                  <button class="button button--primary" type="submit">{{ $content->price === 0 ? 'ライブラリに追加' : '購入' }}</button>
+                  <button class="button button--primary purchase-button" type="submit">{{ $content->price === 0 ? 'ライブラリに追加' : '購入' }}</button>
                 </form>
               @endif
             @else
-              <a class="button button--primary" href="{{ route('login') }}">{{ $content->price === 0 ? 'ライブラリに追加' : '購入' }}</a>
+              <a class="button button--primary purchase-button" href="{{ route('login') }}">{{ $content->price === 0 ? 'ライブラリに追加' : '購入' }}</a>
             @endauth
           </div>
         </section>

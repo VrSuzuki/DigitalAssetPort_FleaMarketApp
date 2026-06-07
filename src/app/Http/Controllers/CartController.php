@@ -23,6 +23,18 @@ class CartController extends Controller
 
     public function store(Request $request, Content $content)
     {
+        if ($content->user_id === $request->user()->id) {
+            return back()->with('status', '自分が投稿したコンテンツは購入できません。');
+        }
+
+        if ($this->hasPurchased($request, $content)) {
+            $order = $this->purchaseOrder($request, $content);
+
+            return $order
+                ? redirect()->route('purchases.show', $order)->with('status', 'このコンテンツは購入済みです。')
+                : redirect()->route('library.index')->with('status', 'このコンテンツはライブラリに追加済みです。');
+        }
+
         if ($content->price === 0) {
             LibraryItem::firstOrCreate([
                 'user_id' => $request->user()->id,
@@ -36,12 +48,12 @@ class CartController extends Controller
 
         $cart = $this->cart($request);
 
-        CartItem::firstOrCreate([
+        $cartItem = CartItem::firstOrCreate([
             'cart_id' => $cart->id,
             'content_id' => $content->id,
         ]);
 
-        return redirect()->route('cart.index')->with('status', 'カートに追加しました。');
+        return redirect()->route('cart.index')->with('status', $cartItem->wasRecentlyCreated ? 'カートに追加しました。' : 'すでにカートに入っています。');
     }
 
     public function destroy(Request $request, CartItem $cartItem)
@@ -55,6 +67,12 @@ class CartController extends Controller
     public function checkout(Request $request)
     {
         $cart = $this->cart($request)->load('items.content');
+
+        $cart->items->filter(function ($item) use ($request) {
+            return $item->content->user_id === $request->user()->id || $this->hasPurchased($request, $item->content);
+        })->each->delete();
+
+        $cart->load('items.content');
 
         if ($cart->items->isEmpty()) {
             return redirect()->route('cart.index')->with('status', 'カートが空です。');
@@ -156,5 +174,22 @@ class CartController extends Controller
         $cart->items()->delete();
 
         return $order;
+    }
+
+    private function hasPurchased(Request $request, Content $content)
+    {
+        return LibraryItem::where('user_id', $request->user()->id)
+            ->where('content_id', $content->id)
+            ->exists();
+    }
+
+    private function purchaseOrder(Request $request, Content $content)
+    {
+        return Order::where('user_id', $request->user()->id)
+            ->whereHas('items', function ($query) use ($content) {
+                $query->where('content_id', $content->id);
+            })
+            ->latest('purchased_at')
+            ->first();
     }
 }

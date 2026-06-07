@@ -18,12 +18,14 @@ class StoreContentRequest extends FormRequest
             'genre_id' => ['required', 'exists:genres,id'],
             'sub_genre_id' => ['required', 'exists:sub_genres,id'],
             'format' => ['required', 'string', 'max:40'],
-            'description' => ['required', 'string', 'max:3000'],
+            'description' => ['required', 'string', 'max:5000'],
             'tags' => ['nullable', 'string', 'max:255'],
             'price' => ['required', 'integer', 'min:0', 'max:100000'],
             'license_type' => ['nullable', 'string', 'max:80'],
             'environment' => ['nullable', 'string', 'max:120'],
             'thumbnail' => ['nullable', 'image', 'max:5120'],
+            'images' => ['nullable', 'array', 'max:20'],
+            'images.*' => ['nullable', 'image', 'max:5120'],
             'content_file' => ['nullable', 'file', 'max:102400'],
         ];
     }
@@ -38,6 +40,8 @@ class StoreContentRequest extends FormRequest
             'description' => 'コンテンツ紹介文',
             'price' => '価格',
             'thumbnail' => 'コンテンツ画像',
+            'images' => 'コンテンツ画像',
+            'images.*' => 'コンテンツ画像',
             'content_file' => 'コンテンツファイル',
         ];
     }

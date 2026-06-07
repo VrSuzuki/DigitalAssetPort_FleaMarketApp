@@ -9,24 +9,24 @@
     <section class="auth-card">
       <h1>アカウント登録画面</h1>
       @include('partials.errors')
-      <form method="POST" action="{{ route('register') }}">
+      <form method="POST" action="{{ route('register') }}" novalidate>
         @csrf
         <div class="form-grid form-grid--single">
           <div class="field">
             <label for="handle">ユーザーID</label>
-            <input class="input" id="handle" name="handle" value="{{ old('handle') }}" required autofocus>
+            <input class="input" id="handle" name="handle" value="{{ old('handle') }}" autofocus>
           </div>
           <div class="field">
             <label for="email">メールアドレス</label>
-            <input class="input" id="email" type="email" name="email" value="{{ old('email') }}" required>
+            <input class="input" id="email" type="email" name="email" value="{{ old('email') }}">
           </div>
           <div class="field">
             <label for="password">設定パスワード</label>
-            <input class="input" id="password" type="password" name="password" required>
+            <input class="input" id="password" type="password" name="password">
           </div>
           <div class="field">
             <label for="password_confirmation">パスワード確認</label>
-            <input class="input" id="password_confirmation" type="password" name="password_confirmation" required>
+            <input class="input" id="password_confirmation" type="password" name="password_confirmation">
           </div>
         </div>
         <div class="form-actions" style="margin-top: 18px;">

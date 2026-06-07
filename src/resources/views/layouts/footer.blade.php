@@ -34,7 +34,7 @@
       <section>
         <h2 class="site-footer__heading">探す</h2>
         <ul class="site-footer__links">
-          <li><a href="{{ route('home') }}">ルートページ</a></li>
+          <li><a href="{{ route('home') }}">トップページ</a></li>
           <li><a href="{{ route('search.advanced') }}">詳細検索</a></li>
           <li><a href="{{ route('about') }}">このサイトについて</a></li>
         </ul>

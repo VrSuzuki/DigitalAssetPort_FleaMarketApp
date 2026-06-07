@@ -9,38 +9,48 @@
   <main class="app-main">
     @include('partials.flash')
 
-    <section class="hero hero--image" aria-labelledby="hero-title">
-      <div class="hero__content">
-        <p class="eyebrow">Digital data marketplace</p>
-        <h1 id="hero-title">ファイルにできる価値を、気兼ねなく売る。</h1>
-        <p>Excel、Word、Notion、動画教材、システム一式、店舗マニュアルまで。すぐ使えるデジタルアセットを探して、投稿して、ライブラリに積み上げる場所です。</p>
-        <div class="hero__actions">
-          <a class="button button--primary" href="{{ route('search.advanced') }}">詳細検索</a>
-          <a class="button button--secondary" href="{{ auth()->check() ? route('contents.create') : route('login') }}">アップロード</a>
-          <a class="button button--ghost" href="{{ route('about') }}">DigitalAssetPortとは</a>
+    <section class="search-summary">
+      <div>
+        <p class="section-eyebrow">Marketplace</p>
+        <h1 class="section-title">
+          @if(request('keyword'))
+            検索キーワード: {{ request('keyword') }}
+          @else
+            すべてのコンテンツ
+          @endif
+        </h1>
+        <div class="filter-tags">
+          @foreach($activeFilters as $filter)
+            @php
+              $removeKeys = $filter['remove'] ?? [$filter['key']];
+              $params = request()->except(array_merge($removeKeys, ['page']));
+            @endphp
+            <a class="filter-tag" href="{{ route('home', $params) }}">
+              {{ $filter['label'] }}
+              <span aria-hidden="true">×</span>
+            </a>
+          @endforeach
         </div>
       </div>
+      <div class="search-summary__meta">
+        <strong>{{ number_format($contents->total()) }}件ヒット</strong>
+        <form class="toolbar__group" action="{{ route('home') }}" method="GET">
+          @foreach(request()->except(['sort', 'per_page', 'page']) as $key => $value)
+            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+          @endforeach
+          <select class="select" name="sort" aria-label="表示順序" onchange="this.form.submit()">
+            @foreach($sorts as $key => $label)
+              <option value="{{ $key }}" {{ request('sort', 'newest') === $key ? 'selected' : '' }}>{{ $label }}</option>
+            @endforeach
+          </select>
+          <select class="select" name="per_page" aria-label="表示件数" onchange="this.form.submit()">
+            @foreach([20, 50, 100] as $count)
+              <option value="{{ $count }}" {{ (int) request('per_page', 20) === $count ? 'selected' : '' }}>{{ $count }}件</option>
+            @endforeach
+          </select>
+        </form>
+      </div>
     </section>
-
-    <div class="toolbar">
-      <a class="button button--ghost" href="{{ route('home') }}">
-        <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
-        検索条件をリセット
-      </a>
-      <form class="toolbar__group" action="{{ route('home') }}" method="GET">
-        <input type="hidden" name="keyword" value="{{ request('keyword') }}">
-        <select class="select" name="sort" aria-label="表示順序" onchange="this.form.submit()">
-          @foreach($sorts as $key => $label)
-            <option value="{{ $key }}" {{ request('sort', 'newest') === $key ? 'selected' : '' }}>{{ $label }}</option>
-          @endforeach
-        </select>
-        <select class="select" name="per_page" aria-label="表示件数" onchange="this.form.submit()">
-          @foreach([20, 50, 100] as $count)
-            <option value="{{ $count }}" {{ (int) request('per_page', 20) === $count ? 'selected' : '' }}>{{ $count }}件</option>
-          @endforeach
-        </select>
-      </form>
-    </div>
 
     <div class="layout-grid">
       <aside class="sidebar" aria-label="サイドメニュー">
@@ -86,7 +96,10 @@
             <p class="section-eyebrow">Assets</p>
             <h2 class="section-title" id="items-title">投稿されたコンテンツ</h2>
           </div>
-          <a class="nav-link" href="{{ route('search.advanced') }}">詳細検索へ</a>
+          <div class="inline-actions">
+            <a class="nav-link" href="{{ route('search.advanced') }}">詳細検索へ</a>
+            <a class="nav-link" href="{{ route('home') }}">検索条件をリセット</a>
+          </div>
         </div>
 
         @if($contents->count())

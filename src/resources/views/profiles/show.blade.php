@@ -12,13 +12,13 @@
       <img class="profile-head__avatar" src="{{ $user->avatar_url }}" alt="">
       <div>
         <h1 class="section-title">{{ $user->display_name }}</h1>
-        <p style="color: var(--muted);">@{{ $user->handle }}</p>
+        <p style="color: var(--muted);">@{{ $user->handle ?: 'user' }}</p>
         <div class="stat-row">
           @if($user->show_following_count || $isOwner)
-            <span>フォロー {{ number_format($user->following()->count()) }}</span>
+            <a href="{{ route('profiles.following', $user) }}">フォロー数 {{ number_format($user->following()->count()) }}</a>
           @endif
           @if($user->show_follower_count || $isOwner)
-            <span>フォロワー {{ number_format($user->followers()->count()) }}</span>
+            <a href="{{ route('profiles.followers', $user) }}">フォロワー数 {{ number_format($user->followers()->count()) }}</a>
           @endif
           <span>投稿 {{ number_format($user->contents()->count()) }}</span>
         </div>

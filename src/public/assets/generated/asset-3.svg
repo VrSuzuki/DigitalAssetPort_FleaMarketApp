@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Manufacturing checklist">
+  <rect width="640" height="400" rx="28" fill="#101624"/>
+  <path d="M80 104h480v250H80z" fill="#edf5f7"/>
+  <path d="M80 70h480v72H80z" fill="#ffcf5a"/>
+  <path d="M130 180h42l24 24 52-60M130 260h42l24 24 52-60" fill="none" stroke="#20c7d2" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M300 174h170M300 226h116M300 258h170M300 310h116" stroke="#253044" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="524" cy="92" r="42" fill="#ff637d"/>
+</svg>

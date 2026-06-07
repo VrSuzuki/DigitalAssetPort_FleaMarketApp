@@ -19,22 +19,24 @@
       <span class="brand__name">DigitalAssetPort</span>
     </a>
 
-    <form class="site-header__search" action="{{ $homeUrl }}" method="GET">
-      <input
-        class="site-header__search-input"
-        type="search"
-        name="keyword"
-        value="{{ request('keyword') }}"
-        placeholder="キーワードを入力"
-        aria-label="コンテンツを検索"
-      >
-      <button class="icon-button icon-button--primary" type="submit" aria-label="検索">
-        <span class="material-symbols-outlined" aria-hidden="true">search</span>
-      </button>
-    </form>
+    <div class="site-header__left">
+      <form class="site-header__search" action="{{ $homeUrl }}" method="GET">
+        <input
+          class="site-header__search-input"
+          type="search"
+          name="keyword"
+          value="{{ request('keyword') }}"
+          placeholder="キーワードを入力"
+          aria-label="コンテンツを検索"
+        >
+        <button class="icon-button icon-button--primary" type="submit" aria-label="検索">
+          <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        </button>
+      </form>
+      <a class="button button--advanced" href="{{ route('search.advanced') }}">詳細検索</a>
+    </div>
 
     <nav class="site-header__nav" aria-label="主要メニュー">
-      <a class="nav-link" href="{{ route('search.advanced') }}">詳細検索</a>
       @guest
         <a class="nav-link" href="{{ route('about') }}">DigitalAssetPortとは</a>
         <a class="button button--ghost" href="{{ route('login') }}">ログイン</a>
@@ -61,9 +63,7 @@
             @empty
               <p class="empty-mini">新しい通知はありません。</p>
             @endforelse
-            @if($unreadNotifications > 8 || $latestNotifications->count() > 0)
-              <a class="menu-link menu-link--strong" href="{{ route('notifications.index') }}">すべてを表示</a>
-            @endif
+            <a class="menu-link menu-link--strong" href="{{ route('notifications.index') }}">すべての通知→</a>
           </div>
         </details>
 
@@ -83,6 +83,9 @@
             <a class="menu-link" href="{{ route('following.index') }}">フォロー</a>
             <a class="menu-link" href="{{ route('favorites.index') }}">お気に入り</a>
             <a class="menu-link" href="{{ route('library.index') }}">ライブラリ</a>
+            <a class="menu-link" href="{{ route('purchases.index') }}">購入履歴</a>
+            <a class="menu-link" href="{{ route('sales.index') }}">売上管理</a>
+            <a class="menu-link" href="{{ route('sales.index', ['tab' => 'orders']) }}">注文一覧</a>
             <a class="menu-link" href="{{ route('settings.index') }}">設定</a>
             <form method="POST" action="{{ route('logout') }}">
               @csrf

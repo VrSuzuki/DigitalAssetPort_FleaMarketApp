@@ -66,6 +66,16 @@ class Content extends Model
         return $this->hasMany(Comment::class)->latest();
     }
 
+    public function images()
+    {
+        return $this->hasMany(ContentImage::class)->orderBy('sort_order');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function scopePublished($query)
     {
         return $query->where('status', 'published');

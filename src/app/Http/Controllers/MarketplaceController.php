@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use App\Models\CartItem;
 use App\Models\Genre;
+use App\Models\LibraryItem;
+use App\Models\Order;
 use App\Models\SubGenre;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,6 +21,7 @@ class MarketplaceController extends Controller
             'authors' => User::withCount('contents')->orderByDesc('contents_count')->take(8)->get(),
             'formats' => $this->formats(),
             'sorts' => $this->sorts(),
+            'activeFilters' => $this->activeFilters($request),
         ]);
     }
 
@@ -31,7 +35,6 @@ class MarketplaceController extends Controller
     public function search(Request $request)
     {
         return view('marketplace.search', [
-            'contents' => $this->contentQuery($request)->paginate($this->perPage($request))->withQueryString(),
             'genres' => Genre::with('subGenres')->get(),
             'subGenres' => SubGenre::with('genre')->get(),
             'formats' => $this->formats(),
@@ -48,8 +51,37 @@ class MarketplaceController extends Controller
             'genre',
             'subGenre',
             'tags',
+            'images',
             'comments.user',
         ])->loadCount(['favorites', 'comments']);
+
+        $purchaseOrder = null;
+        $hasPurchased = false;
+        $inCart = false;
+        $isFavorite = false;
+
+        if (auth()->check()) {
+            $purchaseOrder = Order::where('user_id', auth()->id())
+                ->whereHas('items', function ($query) use ($content) {
+                    $query->where('content_id', $content->id);
+                })
+                ->latest('purchased_at')
+                ->first();
+
+            $hasPurchased = LibraryItem::where('user_id', auth()->id())
+                ->where('content_id', $content->id)
+                ->exists();
+
+            $inCart = CartItem::where('content_id', $content->id)
+                ->whereHas('cart', function ($query) {
+                    $query->where('user_id', auth()->id())->where('active', true);
+                })
+                ->exists();
+
+            $isFavorite = $content->favorites()
+                ->where('user_id', auth()->id())
+                ->exists();
+        }
 
         $authorMore = Content::published()
             ->where('user_id', $content->user_id)
@@ -69,7 +101,7 @@ class MarketplaceController extends Controller
             ->take(4)
             ->get();
 
-        return view('marketplace.show', compact('content', 'authorMore', 'related'));
+        return view('marketplace.show', compact('content', 'authorMore', 'related', 'purchaseOrder', 'hasPurchased', 'inCart', 'isFavorite'));
     }
 
     private function contentQuery(Request $request)
@@ -112,6 +144,10 @@ class MarketplaceController extends Controller
 
         if ($request->filled('sub_genre')) {
             $query->where('sub_genre_id', $request->input('sub_genre'));
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', (int) $request->input('min_price'));
         }
 
         if ($request->filled('max_price')) {
@@ -184,5 +220,42 @@ class MarketplaceController extends Controller
             'price_low' => '価格が安い順',
             'price_high' => '価格が高い順',
         ];
+    }
+
+    private function activeFilters(Request $request)
+    {
+        $filters = collect();
+
+        if ($request->filled('exclude_keyword')) {
+            $filters->push(['key' => 'exclude_keyword', 'label' => '除外: '.$request->input('exclude_keyword')]);
+        }
+
+        if ($request->filled('tag')) {
+            $filters->push(['key' => 'tag', 'label' => 'タグ: '.$request->input('tag')]);
+        }
+
+        if ($request->filled('format')) {
+            $filters->push(['key' => 'format', 'label' => '形式: '.($this->formats()[$request->input('format')] ?? $request->input('format'))]);
+        }
+
+        if ($request->filled('genre')) {
+            $genre = Genre::find($request->input('genre'));
+            $filters->push(['key' => 'genre', 'label' => 'ジャンル: '.optional($genre)->name]);
+        }
+
+        if ($request->filled('sub_genre')) {
+            $subGenre = SubGenre::find($request->input('sub_genre'));
+            $filters->push(['key' => 'sub_genre', 'label' => 'サブジャンル: '.optional($subGenre)->name]);
+        }
+
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            $filters->push([
+                'key' => 'price',
+                'remove' => ['min_price', 'max_price'],
+                'label' => '価格: ¥'.number_format((int) $request->input('min_price', 0)).'〜¥'.number_format((int) $request->input('max_price', 10000)),
+            ]);
+        }
+
+        return $filters->filter(fn ($filter) => filled($filter['label'] ?? null));
     }
 }

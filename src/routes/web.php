@@ -14,6 +14,8 @@ Route::get('/', [MarketplaceController::class, 'index'])->name('home');
 Route::get('/about', [MarketplaceController::class, 'about'])->name('about');
 Route::get('/search', [MarketplaceController::class, 'search'])->name('search.advanced');
 Route::get('/users/{user:handle}', [ProfileController::class, 'show'])->name('profiles.show');
+Route::get('/users/{user:handle}/following', [ProfileController::class, 'following'])->name('profiles.following');
+Route::get('/users/{user:handle}/followers', [ProfileController::class, 'followers'])->name('profiles.followers');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
@@ -31,6 +33,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/settings', [AccountController::class, 'settings'])->name('settings.index');
     Route::post('/settings', [AccountController::class, 'updateSettings'])->name('settings.update');
+    Route::delete('/settings/account', [AccountController::class, 'destroy'])->name('settings.destroy');
     Route::get('/favorites', [AccountController::class, 'favorites'])->name('favorites.index');
     Route::get('/sales', [AccountController::class, 'sales'])->name('sales.index');
     Route::get('/purchases', [AccountController::class, 'purchases'])->name('purchases.index');

@@ -1,6 +1,6 @@
 # DigitalAssetPort
 
-DigitalAssetPort は、Excel / Word / Notion テンプレート、店舗運営マニュアル、学習教材、コード演習セット、動画素材、3Dモデルなどのデジタルデータを販売・配布できる Laravel 製ポートフォリオアプリです。
+DigitalAssetPort は、Excel / Word / Notion テンプレート、生活ノウハウ、学習教材、コード演習セット、動画素材、3Dモデルなどのデジタルデータを販売・配布できる Laravel 製ポートフォリオアプリです。
 
 ## ローカル起動
 
@@ -14,6 +14,7 @@ docker compose exec php php artisan migrate --seed
 - アプリ: `http://localhost`
 - MailHog: `http://localhost:8025`
 - サンプルログイン: `admin@example.com` / `password`
+- Seeder は 12ユーザー、36コンテンツ、購入履歴、通知、フォロー、お気に入りを作成します。
 
 ## 主な機能
 
@@ -41,6 +42,7 @@ erDiagram
     GENRES ||--o{ CONTENTS : classifies
     SUB_GENRES ||--o{ CONTENTS : narrows
     CONTENTS ||--o{ COMMENTS : has
+    CONTENTS ||--o{ CONTENT_IMAGES : shows
     CONTENTS ||--o{ FAVORITES : has
     CONTENTS ||--o{ CART_ITEMS : added
     CONTENTS ||--o{ ORDER_ITEMS : sold
@@ -98,6 +100,13 @@ erDiagram
         bigint user_id FK
         bigint content_id FK
         text message
+        boolean is_recommended
+    }
+    CONTENT_IMAGES {
+        bigint id PK
+        bigint content_id FK
+        string path
+        tinyint sort_order
     }
     CARTS {
         bigint id PK
