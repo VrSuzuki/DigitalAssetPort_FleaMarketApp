@@ -32,16 +32,12 @@ DigitalAssetPort は、テンプレート、教材、コード、画像、音声
 
 ## ローカル起動
 
+
 ```bash
 docker compose up -d --build
 docker compose exec php composer install
 docker compose exec php php artisan storage:link
 docker compose exec php php artisan migrate:fresh --seed
-```
-
-`.env` がない場合は `src/.env.example` を `src/.env` にコピーし、次を実行してください。
-
-```bash
 docker compose exec php php artisan key:generate
 docker compose exec php php artisan migrate
 docker compose exec php php artisan db:seed
