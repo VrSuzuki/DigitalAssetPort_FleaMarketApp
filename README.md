@@ -47,6 +47,7 @@ pullした「DisitalAssetPort」ディレクトリ直下で以下のコマンド
 ```bash
 docker compose up -d --build
 docker compose exec php composer install
+cp src/.env.example src/.env
 docker compose exec php php artisan storage:link
 docker compose exec php php artisan migrate:fresh --seed
 docker compose exec php php artisan key:generate
